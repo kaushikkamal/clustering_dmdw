@@ -1,6 +1,7 @@
 Write a function that will perform the clustering of some data for which all attributes are numeric (real).
 The program must be able to decide the number of attributes in the dataset, as well as the number of records (if needed). 
 Data were stored in a text file, One line is equivalent to one record and each column is equivalent to one attribute.  each of the attribute is separated by tab. And the first attribute is the record ID (a serial number, not to be used for clustering purpose)
+
 A record must be represented by a structure variable in the program. In other words a Array of that structure variable will represent the dataset in Computer's memory.
  
 The structure should have the following provisions.
@@ -17,6 +18,7 @@ you need to write separate functions for inputing the datapoints, displaying the
 Use the PAM algorithm for clustering. The dataset, the number of cluster will be sent as parameters to the function. And will return the representative objects after the clustering is done. Before the above mentioned output are produced, display the representative objects in a human readable form.
 
 Write all your code in a single C source file.
+
 Mark distribution.
 Data types selection 5
 Data representation  5
