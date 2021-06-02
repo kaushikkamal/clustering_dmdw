@@ -1,11 +1,34 @@
 #include <stdio.h>
+#include <stdlib.h>
 typedef struct
 {
     int a;
     float b, c, d;
 } DATA;
 
-int main()
+struct COLLECTION
+{
+    int n;
+    DATA *array;
+};
+
+int initialize(struct COLLECTION *coll)
+{
+    int n;
+    n = 5; // no of records
+    coll->n = n;
+    printf("initialize 1");
+    coll->array = (DATA *)malloc(n * sizeof(DATA));
+    printf("initialize 2");
+    if (coll->array == NULL)
+    {
+        coll->n = 0;
+        return -1;
+    }
+    return 0;
+}
+
+int readData(struct COLLECTION *coll)
 {
     FILE *file;
     DATA d;
@@ -19,71 +42,52 @@ int main()
         return 0;
     }
 
-    
     ch = fscanf(file, "%d\t%f\t%f\t%f\n", &(d.a), &(d.b), &(d.c), &(d.d));
 
+    int i = 0;
     while (ch != EOF)
     {
-        printf("%d\t%.2f\t%.2f\t%.2f\n", d.a, d.b, d.c, d.d);
+        (coll->array)[i] = d;
+        i++;
         ch = fscanf(file, "%d\t%f\t%f\t%f\n", &(d.a), &(d.b), &(d.c), &(d.d));
     }
 
     fclose(file);
+}
+
+int display_data(struct COLLECTION *coll)
+{
+    int i;
+    for (i = 0; i < coll->n; i++)
+    {
+        printf("\nData %d: %f %f %f", (coll->array)[i].a, (coll->array)[i].b, (coll->array)[i].c, (coll->array)[i].d);
+    }
     return 0;
 }
 
-// int main()
-// {
-//     FILE *file;
+int main()
+{
+    int result;
+    struct COLLECTION coll;
+    printf("0");
+    result = initialize(&coll);
+    if (result != 0)
+    {
+        printf("\nError in initialization!");
+        return -1;
+    }
 
-//     char ch;
-
-//     file = fopen("dataset.txt", "r");
-//     if (file == NULL)
-//     {
-//         printf("Cannot open file \n");
-//         return 0;
-//     }
-
-//     ch = fgetc(file);
-//     DATA d;
-//     while (ch != EOF)
-//     {
-
-//         fgets(file, "%f\t%f\t%f\t%f", d.a, d.b, d.c, d.c);
-//         ch = fgetc(file);
-//     }
-
-//     printf("%f, %f,%f, %f", &(d.a), &(d.b), &(d.c), &(d.d));
-
-//     fclose(file);
-//     return 0;
-// }
-
-// int main()
-// {
-//     FILE *file;
-//     DATA d;
-//     int scanned = 0;
-//     float some_ints[4];
-//     int i = 0;
-//     for (i = 0; i < 4; i++)
-//     {
-//         some_ints[i] = 0.0;
-//     }
-
-//     file = fopen("dataset.txt", "r");
-//     while ((scanned = fscanf(file, "%f %f %f %f", some_ints, some_ints + 1, some_ints + 2, some_ints + 3)) != EOF)
-//     {
-//         if (scanned == 4)
-//         {
-//             printf("%f %f %f %f\n", some_ints[0], some_ints[1], some_ints[2], some_ints[3], some_ints[4]);
-//         }
-//         else
-//         {
-//             printf("Whoops! Input format is incorrect!\n");
-//             break;
-//         }
-//     }
-//     return 0;
-// }
+    result = readData(&coll);
+    if (result != 0)
+    {
+        printf("\nError in initialization!");
+        return -1;
+    }
+    result = display_data(&coll);
+    if (result != 0)
+    {
+        printf("\nError in display!");
+        return -1;
+    }
+    return 0;
+}
