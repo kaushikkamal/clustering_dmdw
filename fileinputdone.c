@@ -1,14 +1,10 @@
 #include <stdio.h>
-typedef struct
-{
-    int a;
-    float b, c, d;
-} DATA;
-
-int main()
+    int
+    main()
 {
     FILE *file;
-    DATA d;
+    int a;
+    float b, c, d;
     char ch;
 
     file = fopen("dataset.txt", "r");
@@ -19,12 +15,12 @@ int main()
         return 0;
     }
 
-        ch = fscanf(file, "%d\t%f\t%f\t%f\n", &(d.a), &(d.b), &(d.c), &(d.d));
+    ch = fscanf(file, "%d\t%f\t%f\t%f\n", &a, &b, &c, &d);
 
     while (ch != EOF)
     {
-        printf("%d\t%.2f\t%.2f\t%.2f\n", d.a, d.b, d.c, d.d);
-        ch = fscanf(file, "%d\t%f\t%f\t%f\n", &(d.a), &(d.b), &(d.c), &(d.d));
+        printf("%d\t%.2f\t%.2f\t%.2f\n", a, b, c, d);
+        ch = fscanf(file, "%d\t%f\t%f\t%f\n", &a, &b, &c, &d);
     }
 
     fclose(file);

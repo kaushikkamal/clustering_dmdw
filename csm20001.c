@@ -2,7 +2,7 @@
 #include <stdlib.h>
 typedef struct
 {
-    int a;
+    int recordID;
     float b, c, d;
 } DATA;
 
@@ -17,9 +17,7 @@ int initialize(struct COLLECTION *coll)
     int n;
     n = 5; // no of records
     coll->n = n;
-    printf("initialize 1");
     coll->array = (DATA *)malloc(n * sizeof(DATA));
-    printf("initialize 2");
     if (coll->array == NULL)
     {
         coll->n = 0;
@@ -33,26 +31,26 @@ int readData(struct COLLECTION *coll)
     FILE *file;
     DATA d;
     char ch;
+    int i;
 
+    i = 0;
     file = fopen("dataset.txt", "r");
 
     if (file == NULL)
     {
-        printf("Cannot open file!\n");
-        return 0;
+        return -1;
     }
 
-    ch = fscanf(file, "%d\t%f\t%f\t%f\n", &(d.a), &(d.b), &(d.c), &(d.d));
-
-    int i = 0;
+    ch = fscanf(file, "%d\t%f\t%f\t%f\n", &(d.recordID), &(d.b), &(d.c), &(d.d));
     while (ch != EOF)
     {
         (coll->array)[i] = d;
         i++;
-        ch = fscanf(file, "%d\t%f\t%f\t%f\n", &(d.a), &(d.b), &(d.c), &(d.d));
+        ch = fscanf(file, "%d\t%f\t%f\t%f\n", &(d.recordID), &(d.b), &(d.c), &(d.d));
     }
 
     fclose(file);
+    return 0;
 }
 
 int display_data(struct COLLECTION *coll)
@@ -60,8 +58,15 @@ int display_data(struct COLLECTION *coll)
     int i;
     for (i = 0; i < coll->n; i++)
     {
-        printf("\nData %d: %f %f %f", (coll->array)[i].a, (coll->array)[i].b, (coll->array)[i].c, (coll->array)[i].d);
+        printf("\nData %d: %f %f %f", (coll->array)[i].recordID, (coll->array)[i].b, (coll->array)[i].c, (coll->array)[i].d);
     }
+    return 0;
+}
+
+int release_memory(struct COLLECTION coll)
+{
+    free(coll.array);
+    coll.array == NULL;
     return 0;
 }
 
@@ -69,7 +74,6 @@ int main()
 {
     int result;
     struct COLLECTION coll;
-    printf("0");
     result = initialize(&coll);
     if (result != 0)
     {
@@ -80,13 +84,20 @@ int main()
     result = readData(&coll);
     if (result != 0)
     {
-        printf("\nError in initialization!");
+        printf("\nCannot open file!");
         return -1;
     }
     result = display_data(&coll);
     if (result != 0)
     {
         printf("\nError in display!");
+        return -1;
+    }
+
+    result = release_memory(coll);
+    if (result != 0)
+    {
+        printf("\nTerminated unsuccessfully");
         return -1;
     }
     return 0;
