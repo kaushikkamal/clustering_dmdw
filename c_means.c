@@ -30,7 +30,8 @@ int viewCluster(C *cluster)
 }
 int main()
 {
-	int arr[] = {10, 55, 15, 56, 50, 11};
+	int arr[] = {3, 15, 2, 17, 18, 1};
+	// int arr[] = {10, 55, 15, 56, 50, 11};
 	C *final_cluster = NULL;
 	C *head = NULL;
 	int best_cost = 10000000; //High best cost to update

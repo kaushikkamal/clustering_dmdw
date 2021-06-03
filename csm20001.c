@@ -3,7 +3,8 @@
 typedef struct
 {
     int recordID;
-    float b, c, d;
+    float b;
+    // , c, d;
 } DATA;
 
 struct COLLECTION
@@ -12,18 +13,19 @@ struct COLLECTION
     DATA *array;
 };
 
-int initialize(struct COLLECTION *coll)
+int initialize(struct COLLECTION *coll, int n)
 {
-    int n;
-    n = 5; // no of records
+    if (n <= 0)
+        return -1;
+
     coll->n = n;
     coll->array = (DATA *)malloc(n * sizeof(DATA));
-    if (coll->array == NULL)
-    {
-        coll->n = 0;
-        return -1;
-    }
-    return 0;
+
+    if (coll->array != NULL)
+        return 0;
+
+    coll->n = 0;
+    return -2;
 }
 
 int readData(struct COLLECTION *coll)
@@ -31,22 +33,23 @@ int readData(struct COLLECTION *coll)
     FILE *file;
     DATA d;
     char ch;
-    int i;
+    int i, n;
 
     i = 0;
+    n = coll->n;
+
     file = fopen("dataset.txt", "r");
-
     if (file == NULL)
-    {
         return -1;
-    }
 
-    ch = fscanf(file, "%d\t%f\t%f\t%f\n", &(d.recordID), &(d.b), &(d.c), &(d.d));
-    while (ch != EOF)
+    ch = fscanf(file, "%d\t%f\n", &(d.recordID), &(d.b));
+    // ch = fscanf(file, "%d\t%f\t%f\t%f\n", &(d.recordID), &(d.b), &(d.c), &(d.d));
+    while (ch != EOF && i < n)
     {
         (coll->array)[i] = d;
         i++;
-        ch = fscanf(file, "%d\t%f\t%f\t%f\n", &(d.recordID), &(d.b), &(d.c), &(d.d));
+        ch = fscanf(file, "%d\t%f\n", &(d.recordID), &(d.b));
+        // ch = fscanf(file, "%d\t%f\t%f\t%f\n", &(d.recordID), &(d.b), &(d.c), &(d.d));
     }
 
     fclose(file);
@@ -58,7 +61,8 @@ int display_data(struct COLLECTION *coll)
     int i;
     for (i = 0; i < coll->n; i++)
     {
-        printf("\nData %d: %f %f %f", (coll->array)[i].recordID, (coll->array)[i].b, (coll->array)[i].c, (coll->array)[i].d);
+        printf("\nData %d: %.1f", (coll->array)[i].recordID, (coll->array)[i].b);
+        // printf("\nData %d: %f %f %f", (coll->array)[i].recordID, (coll->array)[i].b, (coll->array)[i].c, (coll->array)[i].d);
     }
     return 0;
 }
@@ -72,9 +76,24 @@ int release_memory(struct COLLECTION coll)
 
 int main()
 {
-    int result;
+    int result, n;
     struct COLLECTION coll;
-    result = initialize(&coll);
+
+    do
+    {
+        printf("\nEnter the number of rows of dataset: ");
+        scanf("%d", &n);
+        result = initialize(&coll, n);
+
+        if (result == -1)
+            printf("\nEntered value should be greater than 0\n");
+        else if (result == -2)
+            printf("\nMemory is not allocated\n");
+        else
+            break;
+
+    } while (result != 0);
+
     if (result != 0)
     {
         printf("\nError in initialization!");
@@ -87,6 +106,7 @@ int main()
         printf("\nCannot open file!");
         return -1;
     }
+   
     result = display_data(&coll);
     if (result != 0)
     {
