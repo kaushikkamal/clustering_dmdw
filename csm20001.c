@@ -1,15 +1,17 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 typedef struct
 {
+    int label;
     int recordID;
-    float b;
+    float b, c;
     // , c, d;
 } DATA;
 
 struct COLLECTION
 {
-    int n;
+    int n, k; // check
     DATA *array;
 };
 
@@ -28,7 +30,7 @@ int initialize(struct COLLECTION *coll, int n)
     return -2;
 }
 
-int readData(struct COLLECTION *coll)
+int readData(struct COLLECTION coll)
 {
     FILE *file;
     DATA d;
@@ -36,19 +38,19 @@ int readData(struct COLLECTION *coll)
     int i, n;
 
     i = 0;
-    n = coll->n;
+    n = coll.n;
 
     file = fopen("dataset.txt", "r");
     if (file == NULL)
         return -1;
 
-    ch = fscanf(file, "%d\t%f\n", &(d.recordID), &(d.b));
+    ch = fscanf(file, "%d\t%f\t%f\n", &(d.recordID), &(d.b), &(d.c));
     // ch = fscanf(file, "%d\t%f\t%f\t%f\n", &(d.recordID), &(d.b), &(d.c), &(d.d));
     while (ch != EOF && i < n)
     {
-        (coll->array)[i] = d;
+        (coll.array)[i] = d;
         i++;
-        ch = fscanf(file, "%d\t%f\n", &(d.recordID), &(d.b));
+        ch = fscanf(file, "%d\t%f\t%f\n", &(d.recordID), &(d.b), &(d.c));
         // ch = fscanf(file, "%d\t%f\t%f\t%f\n", &(d.recordID), &(d.b), &(d.c), &(d.d));
     }
 
@@ -56,12 +58,49 @@ int readData(struct COLLECTION *coll)
     return 0;
 }
 
-int display_data(struct COLLECTION *coll)
+float distance(DATA a, DATA b)
+{
+    return sqrt((a.b - b.b) * (a.b - b.b) + (a.c - b.c) * (a.c - b.c));
+}
+
+int pam(struct COLLECTION coll, int k)
+{
+    int i, j;
+    float totalCost, minCost, currentCost;
+    DATA *cluster;
+
+    totalCost = 0.0;
+    cluster = (DATA *)malloc(k * sizeof(DATA));
+
+    if (cluster == NULL)
+        return 0;
+
+    // initial clusters
+    for (i = 0; i < k; i++)
+        cluster[i] = coll.array[i];
+
+    for (i = 0; i < coll.n; i++)
+    {
+        minCost = __FLT_MAX__; // MAX FLOAT
+        for (j = 0; j < k; j++)
+        {
+            currentCost = distance(coll.array[i], cluster[j]);
+            if (currentCost < minCost)
+            {
+                coll.array[i].label = j;
+                minCost = currentCost;
+            }
+        }
+        totalCost += minCost;
+    }
+}
+
+int display_data(struct COLLECTION coll)
 {
     int i;
-    for (i = 0; i < coll->n; i++)
+    for (i = 0; i < coll.n; i++)
     {
-        printf("\nData %d: %.1f", (coll->array)[i].recordID, (coll->array)[i].b);
+        printf("\nData %d: %.1f %.1f Label %d", (coll.array)[i].recordID, (coll.array)[i].b, (coll.array)[i].c, (coll.array)[i].label);
         // printf("\nData %d: %f %f %f", (coll->array)[i].recordID, (coll->array)[i].b, (coll->array)[i].c, (coll->array)[i].d);
     }
     return 0;
@@ -76,12 +115,27 @@ int release_memory(struct COLLECTION coll)
 
 int main()
 {
-    int result, n;
+    int result, n, k;
     struct COLLECTION coll;
 
+    // read clursted number
     do
     {
-        printf("\nEnter the number of rows of dataset: ");
+        printf("\nEnter the number of clusters: ");
+        scanf("%d", &k);
+
+        if (k < 1)
+            printf("\nThe number of clusters should be greater than 0\n");
+        else
+            break;
+
+    } while (k < 1);
+    // end read clursted number
+
+    // read number of records of dataset
+    do
+    {
+        printf("\nEnter the number of records of dataset: ");
         scanf("%d", &n);
         result = initialize(&coll, n);
 
@@ -94,20 +148,24 @@ int main()
 
     } while (result != 0);
 
+    // end read number of records of dataset
+
     if (result != 0)
     {
         printf("\nError in initialization!");
         return -1;
     }
 
-    result = readData(&coll);
+    result = readData(coll);
     if (result != 0)
     {
         printf("\nCannot open file!");
         return -1;
     }
-   
-    result = display_data(&coll);
+
+    result = pam(coll, k);
+
+    result = display_data(coll);
     if (result != 0)
     {
         printf("\nError in display!");
