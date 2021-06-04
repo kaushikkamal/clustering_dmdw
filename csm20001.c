@@ -11,7 +11,7 @@ typedef struct
 
 struct COLLECTION
 {
-    int n, k; // check
+    int n; // check
     DATA *array;
 };
 
@@ -111,10 +111,14 @@ int pam(struct COLLECTION coll, int k)
                 minCostRecordIndex = q;
             }
         }
-        cluster[p] = coll.array[minCostRecordIndex];
+
+        if (cluster[p].recordID != coll.array[minCostRecordIndex].recordID)
+        {
+            cluster[p] = coll.array[minCostRecordIndex];
+        }
     }
-    // for (i = 0; i < k; i++)
-    //     printf("\nCluster data %d: %f %f", cluster[i].recordID, cluster[i].b, cluster[i].c);
+    for (i = 0; i < k; i++)
+        printf("\nCluster data %d: %f %f", cluster[i].recordID, cluster[i].b, cluster[i].c);
 }
 
 int display_data(struct COLLECTION coll)
