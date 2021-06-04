@@ -113,6 +113,8 @@ int pam(struct COLLECTION coll, int k)
         }
         cluster[p] = coll.array[minCostRecordIndex];
     }
+    // for (i = 0; i < k; i++)
+    //     printf("\nCluster data %d: %f %f", cluster[i].recordID, cluster[i].b, cluster[i].c);
 }
 
 int display_data(struct COLLECTION coll)
