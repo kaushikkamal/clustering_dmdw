@@ -60,38 +60,58 @@ int readData(struct COLLECTION coll)
 
 float distance(DATA a, DATA b)
 {
-    return sqrt((a.b - b.b) * (a.b - b.b) + (a.c - b.c) * (a.c - b.c));
+    // return sqrt((a.b - b.b) * (a.b - b.b) + (a.c - b.c) * (a.c - b.c));
+    return sqrt(pow(a.b - b.b, 2) + pow(a.c - b.c, 2));
 }
 
 int pam(struct COLLECTION coll, int k)
 {
-    int i, j;
-    float totalCost, minCost, currentCost;
+    int i, j, p, q, minCostRecordIndex;
+    float allMinTotalCost, totalCost, minCost, currentCost;
     DATA *cluster;
 
-    totalCost = 0.0;
     cluster = (DATA *)malloc(k * sizeof(DATA));
 
     if (cluster == NULL)
-        return 0;
+        return -1;
 
     // initial clusters
     for (i = 0; i < k; i++)
         cluster[i] = coll.array[i];
 
-    for (i = 0; i < coll.n; i++)
+    for (p = 0; p < k; p++)
     {
-        minCost = __FLT_MAX__; // MAX FLOAT
-        for (j = 0; j < k; j++)
+        allMinTotalCost = __FLT_MAX__;
+        for (q = 0; q < coll.n; q++)
         {
-            currentCost = distance(coll.array[i], cluster[j]);
-            if (currentCost < minCost)
+            totalCost = 0.0; // delete it
+
+            if (cluster[p].recordID != coll.array[q].recordID)
             {
-                coll.array[i].label = j;
-                minCost = currentCost;
+                cluster[p] = coll.array[q];
+            }
+
+            for (i = 0; i < coll.n; i++)
+            {
+                minCost = __FLT_MAX__; // MAX FLOAT
+                for (j = 0; j < k; j++)
+                {
+                    currentCost = distance(coll.array[i], cluster[j]);
+                    if (currentCost < minCost)
+                    {
+                        coll.array[i].label = j;
+                        minCost = currentCost;
+                    }
+                }
+                totalCost += minCost;
+            }
+            if (totalCost < allMinTotalCost)
+            {
+                allMinTotalCost = totalCost;
+                minCostRecordIndex = q;
             }
         }
-        totalCost += minCost;
+        cluster[p] = coll.array[minCostRecordIndex];
     }
 }
 
