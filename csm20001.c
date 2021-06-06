@@ -65,7 +65,7 @@ float distance(DATA a, DATA b)
 
 int pam(COLLECTION coll, int k)
 {
-    int i, j, p, q, minCostRecordIndex, result;
+    int i, j, p, q ,minCostRecordIndex, result;
     float allMinTotalCost, totalCost, minCost, currentCost;
     DATA *cluster;
 
@@ -146,7 +146,7 @@ int display_data(COLLECTION coll)
 int release_memory(COLLECTION coll)
 {
     free(coll.array);
-    coll.array == NULL;
+    coll.array = NULL;
     return 0;
 }
 

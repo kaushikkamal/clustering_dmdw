@@ -20,75 +20,26 @@
 
 typedef struct
 {
-    float recordId;
+    int recordId;
+    int label;
     float *p;
-    char cluster, visited;
+    // char cluster, visited;
 } RECORD;
 
 typedef struct
 {
-    int label;
-    int recordID;
-    float b, c;
-    // , c, d;
-} dataLabel;
-
-struct COLLECTION
-{
     int noOfRecords;
     int noOfAttributes;
-    // dataLabel *array;
     RECORD *array;
-};
-
-struct NODE
-{
-    int dataLabel;
-    struct NODE *ptr;
-};
+} COLLECTION;
 
 typedef struct
 {
-    struct NODE *tos;
-} STACK;
+    int noOfCluster;
+    RECORD *clusterData;
+} CLUSTER;
 
-int push(STACK *s, int dataLabel)
-{
-    struct NODE *sNode;
-    sNode = (struct NODE *)malloc(sizeof(struct NODE));
-    if (sNode != NULL)
-    {
-        sNode->dataLabel = dataLabel;
-        sNode->ptr = s->tos;
-        s->tos = sNode;
-        return 0;
-    }
-    return -1;
-}
-
-int pop(STACK *s)
-{
-    int deleted_value;
-    struct NODE *tempSNode;
-
-    if (s->tos == NULL)
-        return -1;
-
-    tempSNode = s->tos;
-    deleted_value = tempSNode->dataLabel;
-    s->tos = s->tos->ptr;
-    tempSNode->ptr = NULL;
-    free(tempSNode);
-
-    return deleted_value;
-}
-
-int is_stack_empty(STACK s)
-{
-    return s.tos == NULL;
-}
-
-int initialize(struct COLLECTION *coll, int numAttr, int n)
+int initialize(COLLECTION *coll, int numAttr, int n)
 {
     if (n <= 0)
         return -1;
@@ -96,26 +47,24 @@ int initialize(struct COLLECTION *coll, int numAttr, int n)
     if (numAttr <= 0)
         return -2;
 
-    coll->noOfRecords = n;
-    coll->noOfAttributes = numAttr;
     coll->array = (RECORD *)malloc(n * sizeof(RECORD));
 
     if (coll->array != NULL)
+    {
+        coll->noOfRecords = n;
+        coll->noOfAttributes = numAttr;
         return 0;
+    }
 
     return -3;
 }
 
-int readData(struct COLLECTION coll)
+int readData(COLLECTION coll)
 {
     FILE *file;
-    dataLabel d;
     char ch;
     int i, j, n;
     float dataPoints;
-
-    i = 0;
-    n = coll.noOfRecords;
 
     file = fopen("dataset.txt", "r");
     if (file == NULL)
@@ -123,19 +72,21 @@ int readData(struct COLLECTION coll)
 
     for (i = 0; i < coll.noOfRecords; i++)
     {
-        coll.array->p = (float *)malloc(sizeof(float) * coll.noOfAttributes);
+        coll.array[i].p = (float *)malloc(coll.noOfAttributes * sizeof(float));
 
-        for (j = 0; j <= coll.noOfAttributes; j++)
+        for (j = 0; j < coll.noOfAttributes; j++)
         {
-            fscanf(file, "%f", &dataPoints);
-            coll.array->p[j] = dataPoints;
+            fscanf(file, "%f\t", &dataPoints);
+            // printf("%.2f  ", dataPoints);
+            coll.array[i].p[j] = dataPoints;
             if (j == 0)
             {
-                coll.array->recordId = coll.array->p[0];
+                coll.array[i].recordId = coll.array[i].p[j];
             }
         }
-        coll.array[i].cluster = 'UNCLASSIFIED';
-        coll.array[i].visited = 'NOT_VISITED';
+        // printf("\n");
+        // coll.array[i].cluster = 'UN';
+        // coll.array[i].visited = 'NOT';
     }
 
     // ch = fscanf(file, "%d\t%f\t%f\n", &(d.recordID), &(d.b), &(d.c));
@@ -152,86 +103,119 @@ int readData(struct COLLECTION coll)
     return 0;
 }
 
-float distance(dataLabel a, dataLabel b)
-{
-    return sqrt(pow(a.b - b.b, 2) + pow(a.c - b.c, 2));
-}
-
-// int pam(struct COLLECTION coll, int k)
+// float distance(dataLabel a, dataLabel b)
 // {
-//     int i, j, p, q, minCostRecordIndex, result;
-//     float allMinTotalCost, totalCost, minCost, currentCost;
-//     dataLabel *cluster;
-//     STACK s;
-//     s.tos = NULL;
-
-//     cluster = (dataLabel *)malloc(k * sizeof(dataLabel));
-
-//     if (cluster == NULL)
-//         return -1;
-
-//     // initial clusters
-//     for (i = 0; i < k; i++)
-//         cluster[i] = coll.array[i];
-
-//     for (p = 0; p < k; p++)
-//     {
-//         allMinTotalCost = __FLT_MAX__;
-//         for (q = 0; q < coll.n; q++)
-//         {
-//             totalCost = 0.0; // delete it
-
-//             if (cluster[p].recordID != coll.array[q].recordID)
-//             {
-//                 cluster[p] = coll.array[q];
-//             }
-
-//             for (i = 0; i < coll.n; i++)
-//             {
-//                 minCost = __FLT_MAX__; // MAX FLOAT
-//                 for (j = 0; j < k; j++)
-//                 {
-//                     currentCost = distance(coll.array[i], cluster[j]);
-//                     if (currentCost < minCost)
-//                     {
-//                         // coll.array[i].label = j;
-//                         result = push(&s, j);
-//                         minCost = currentCost;
-//                     }
-//                 }
-//                 totalCost += minCost;
-//             }
-//             if (totalCost < allMinTotalCost)
-//             {
-//                 allMinTotalCost = totalCost;
-//                 minCostRecordIndex = q;
-//             }
-//         }
-
-//         if (cluster[p].recordID != coll.array[minCostRecordIndex].recordID)
-//         {
-//             cluster[p] = coll.array[minCostRecordIndex];
-//         }
-//     }
-
-//     // i = coll.n - 1;
-//     // while (!is_stack_empty(s) && i <= 0)
-//     // {
-//     //     result = pop(&s);
-//     //     coll.array[i].label = result;
-//     //     i--;
-//     // }
-//     // while (!is_stack_empty(s))
-//     // {
-//     //     result = pop(&s);
-//     //     printf("\n%d",result);
-//     // }
-
-//     for (i = 0; i < k; i++)
-//         printf("\nCluster data %d: %f %f", cluster[i].recordID, cluster[i].b, cluster[i].c);
+//     return sqrt(pow(a.b - b.b, 2) + pow(a.c - b.c, 2));
 // }
 
-int display_data(struct COLLECTION coll)
+int pam(COLLECTION coll, int k)
+{
+    int i, j, p, q, m, n, minCostRecordIndex, result;
+    float allMinTotalCost, totalCost, minCost, currentCost, tempCostSum;
+    CLUSTER cluster;
+
+    cluster.clusterData = (RECORD *)malloc(k * sizeof(RECORD));
+
+    if (cluster.clusterData == NULL)
+        return -1;
+
+    cluster.noOfCluster = k;
+
+    // initial clusters
+    for (i = 0; i < k; i++)
+        cluster.clusterData[i] = coll.array[i];
+
+    for (p = 0; p < k; p++)
+    {
+        allMinTotalCost = __FLT_MAX__;
+        for (q = 0; q < coll.noOfRecords; q++)
+        {
+            totalCost = 0.0;
+
+            if (cluster.clusterData[p].recordId != coll.array[q].recordId)
+            {
+                cluster.clusterData[p] = coll.array[q];
+            }
+
+            for (m = 0; m < coll.noOfRecords; m++)
+            {
+                minCost = __FLT_MAX__;
+                for (n = 0; n < k; n++)
+                {
+                    tempCostSum = 0.0;
+                    for (i = 0; i < coll.noOfAttributes; i++)
+                    {
+                        if (i != 0)
+                        {
+                            tempCostSum += pow((coll.array[m].p[i] - cluster.clusterData[n].p[i]), 2);
+                        }
+                    }
+                    currentCost = sqrt(tempCostSum);
+                    if (currentCost < minCost)
+                    {
+                        minCost = currentCost;
+                    }
+                }
+                totalCost += minCost;
+            }
+            if (totalCost < allMinTotalCost)
+            {
+                allMinTotalCost = totalCost;
+                minCostRecordIndex = q;
+            }
+        }
+
+        if (cluster.clusterData[p].recordId != coll.array[minCostRecordIndex].recordId)
+        {
+            cluster.clusterData[p] = coll.array[minCostRecordIndex];
+        }
+    }
+
+   
+    for (m = 0; m < coll.noOfRecords; m++)
+    {
+        minCost = __FLT_MAX__;
+        for (n = 0; n < k; n++)
+        {
+            tempCostSum = 0.0;
+            for (i = 0; i < coll.noOfAttributes; i++)
+            {
+                if (i != 0)
+                {
+                    tempCostSum += pow((coll.array[m].p[i] - cluster.clusterData[n].p[i]), 2);
+                }
+            }
+            currentCost = sqrt(tempCostSum);
+           
+            if (currentCost < minCost)
+            {
+                coll.array[m].label = n;
+                minCost = currentCost;
+            }
+            printf("\n\n");
+        }
+    }
+    result = display_data(coll);
+    // display cluster
+    for (i = 0; i < k; i++)
+    {
+        for (j = 0; j < coll.noOfAttributes; j++)
+        {
+            if (j == 0)
+            {
+                printf("\nCluster Record ID: %f\nData: ", cluster.clusterData[i].p[j]);
+            }
+            else
+            {
+                printf("%.1f  ", cluster.clusterData[i].p[j]);
+            }
+        }
+        printf("\n");
+    }
+    return 0;
+}
+
+int display_data(COLLECTION coll)
 {
     int i, j;
     for (i = 0; i < coll.noOfRecords; i++)
@@ -240,27 +224,31 @@ int display_data(struct COLLECTION coll)
         {
             if (j == 0)
             {
-                printf("\nRecord ID: %f\nData: ", coll.array->recordId);
+                printf("\nRecord ID: %f\nLabel: %f\nData: ", coll.array[i].p[j], coll.array[i].label);
             }
-
-            printf("%.1f  ", coll.array[i].p[j]);
+            else
+            {
+                printf("%.1f  ", coll.array[i].p[j]);
+            }
         }
         printf("\n");
     }
     return 0;
 }
 
-int release_memory(struct COLLECTION coll)
+int release_memory(COLLECTION coll)
 {
+    free(coll.array->p);
     free(coll.array);
-    coll.array == NULL;
+    coll.array->p = NULL;
+    coll.array = NULL;
     return 0;
 }
 
 int main()
 {
     int result, n, k, nA;
-    struct COLLECTION coll;
+    COLLECTION coll;
 
     // read clursted number
     do
@@ -279,7 +267,7 @@ int main()
     // read number of records of dataset
     do
     {
-        printf("\nEnter the number of attributes of dataset: ");
+        printf("\nEnter the number of attributes of dataset(including record ID): ");
         scanf("%d", &nA);
         printf("\nEnter the number of records of dataset: ");
         scanf("%d", &n);
@@ -311,14 +299,21 @@ int main()
         return -1;
     }
 
-    // result = pam(coll, k);
-
-    result = display_data(coll);
+    printf("\nbefore pam\n\n");
+    result = pam(coll, k);
     if (result != 0)
     {
-        printf("\nError in display!");
+        printf("\nError in pam!");
         return -1;
     }
+    printf("\n\nafter in pam");
+
+    // result = display_data(coll);
+    // if (result != 0)
+    // {
+    //     printf("\nError in display!");
+    //     return -1;
+    // }
 
     result = release_memory(coll);
     if (result != 0)
