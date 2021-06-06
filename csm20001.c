@@ -1,21 +1,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+
 typedef struct
 {
     int label;
     int recordID;
     float b, c;
-    // , c, d;
 } DATA;
 
-struct COLLECTION
+typedef struct
 {
-    int n; // check
+    int n;
     DATA *array;
-};
+} COLLECTION;
 
-int initialize(struct COLLECTION *coll, int n)
+int initialize(COLLECTION *coll, int n)
 {
     if (n <= 0)
         return -1;
@@ -30,7 +30,7 @@ int initialize(struct COLLECTION *coll, int n)
     return -2;
 }
 
-int readData(struct COLLECTION coll)
+int readData(COLLECTION coll)
 {
     FILE *file;
     DATA d;
@@ -60,13 +60,12 @@ int readData(struct COLLECTION coll)
 
 float distance(DATA a, DATA b)
 {
-    // return sqrt((a.b - b.b) * (a.b - b.b) + (a.c - b.c) * (a.c - b.c));
     return sqrt(pow(a.b - b.b, 2) + pow(a.c - b.c, 2));
 }
 
-int pam(struct COLLECTION coll, int k)
+int pam(COLLECTION coll, int k)
 {
-    int i, j, p, q, minCostRecordIndex;
+    int i, j, p, q, minCostRecordIndex, result;
     float allMinTotalCost, totalCost, minCost, currentCost;
     DATA *cluster;
 
@@ -84,8 +83,7 @@ int pam(struct COLLECTION coll, int k)
         allMinTotalCost = __FLT_MAX__;
         for (q = 0; q < coll.n; q++)
         {
-            totalCost = 0.0; // delete it
-
+            totalCost = 0.0;
             if (cluster[p].recordID != coll.array[q].recordID)
             {
                 cluster[p] = coll.array[q];
@@ -99,7 +97,6 @@ int pam(struct COLLECTION coll, int k)
                     currentCost = distance(coll.array[i], cluster[j]);
                     if (currentCost < minCost)
                     {
-                        coll.array[i].label = j;
                         minCost = currentCost;
                     }
                 }
@@ -117,22 +114,36 @@ int pam(struct COLLECTION coll, int k)
             cluster[p] = coll.array[minCostRecordIndex];
         }
     }
+
+    for (i = 0; i < coll.n; i++)
+    {
+        minCost = __FLT_MAX__;
+        for (j = 0; j < k; j++)
+        {
+            currentCost = distance(coll.array[i], cluster[j]);
+            if (currentCost < minCost)
+            {
+                coll.array[i].label = j;
+                minCost = currentCost;
+            }
+        }
+    }
+
     for (i = 0; i < k; i++)
         printf("\nCluster data %d: %f %f", cluster[i].recordID, cluster[i].b, cluster[i].c);
 }
 
-int display_data(struct COLLECTION coll)
+int display_data(COLLECTION coll)
 {
     int i;
     for (i = 0; i < coll.n; i++)
     {
         printf("\nData %d: %.1f %.1f Label %d", (coll.array)[i].recordID, (coll.array)[i].b, (coll.array)[i].c, (coll.array)[i].label);
-        // printf("\nData %d: %f %f %f", (coll->array)[i].recordID, (coll->array)[i].b, (coll->array)[i].c, (coll->array)[i].d);
     }
     return 0;
 }
 
-int release_memory(struct COLLECTION coll)
+int release_memory(COLLECTION coll)
 {
     free(coll.array);
     coll.array == NULL;
@@ -142,7 +153,7 @@ int release_memory(struct COLLECTION coll)
 int main()
 {
     int result, n, k;
-    struct COLLECTION coll;
+    COLLECTION coll;
 
     // read clursted number
     do

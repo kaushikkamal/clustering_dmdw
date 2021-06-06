@@ -155,3 +155,40 @@ int main()
 
 	return 0;
 }
+
+// initial clusters
+// for (i = 0; i < k; i++){
+// 	cluster[i] = coll.array[i];
+// }
+	
+// for (p = 0; p < k; p++)
+// {
+// 	allMinTotalCost = 1000000;
+// 	for (q = 0; q < coll.n; q++)
+// 	{
+// 		totalCost = 0.0;
+
+// 		cluster[p] = coll.array[q];
+
+// 		for (i = 0; i < coll.n; i++)
+// 		{
+// 			minCost = 1000000;
+// 			for (j = 0; j < k; j++)
+// 			{
+// 				currentCost = distance(coll.array[i], cluster[j]);
+// 				if (currentCost < minCost)
+// 				{
+// 					coll.array[i].label = j;
+// 					minCost = currentCost;
+// 				}
+// 			}
+// 			totalCost += minCost;
+// 		}
+// 		if (totalCost < allMinTotalCost)
+// 		{
+// 			allMinTotalCost = totalCost;
+// 			minCostRecordIndex = q;
+// 		}
+// 	}
+// 	cluster[p] = coll.array[minCostRecordIndex];
+// }
