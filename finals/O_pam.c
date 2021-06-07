@@ -7,28 +7,28 @@ typedef struct
     int id;
     int label;
     float *values;
-} RECORD;
+} DATA;
 
 typedef struct
 {
-    RECORD *clusters;
+    DATA *clusters;
 } CLUSTER;
 
 typedef struct
 {
     int no_attributes;
     int no_records;
-    RECORD *records;
-} COLLECTION;
+    DATA *records;
+} DATASET;
 
-int PAM(COLLECTION collection, int k)
+int PAM(DATASET data_set, int k)
 {
     CLUSTER c;
     int i, j, p, q, r, s;
     int loc;
     float cost1, cost2, cost3, cost4, cost5;
 
-    c.clusters = (RECORD *)malloc(sizeof(RECORD) * k);
+    c.clusters = (DATA *)malloc(sizeof(DATA) * k);
 
     if (c.clusters == NULL)
     {
@@ -37,27 +37,27 @@ int PAM(COLLECTION collection, int k)
 
     for (i = 0; i < k; i++)
     {
-        c.clusters[i] = collection.records[i];
+        c.clusters[i] = data_set.records[i];
     }
 
     for (p = 0; p < k; p++)
     {
         cost5 = 100000000;
-        for (q = 0; q < collection.no_records; q++)
+        for (q = 0; q < data_set.no_records; q++)
         {
             cost4 = 0;
-            c.clusters[p] = collection.records[q];
-            for (r = 0; r < collection.no_records; r++)
+            c.clusters[p] = data_set.records[q];
+            for (r = 0; r < data_set.no_records; r++)
             {
                 cost3 = 100000000;
                 for (s = 0; s < k; s++)
                 {
                     cost1 = 0;
-                    for (i = 0; i < collection.no_attributes; i++)
+                    for (i = 0; i < data_set.no_attributes; i++)
                     {
                         if (i != 0)
                         {
-                            cost1 += pow((collection.records[r].values[i] - c.clusters[s].values[i]), 2);
+                            cost1 += pow((data_set.records[r].values[i] - c.clusters[s].values[i]), 2);
                         }
                     }
                     if (sqrt(cost1) < cost3)
@@ -74,36 +74,36 @@ int PAM(COLLECTION collection, int k)
             }
         }
 
-        if (c.clusters[p].id != collection.records[loc].id)
+        if (c.clusters[p].id != data_set.records[loc].id)
         {
-            c.clusters[p] = collection.records[loc];
+            c.clusters[p] = data_set.records[loc];
         }
     }
 
-    for (r = 0; r < collection.no_records; r++)
+    for (r = 0; r < data_set.no_records; r++)
     {
         cost3 = 100000000;
         for (s = 0; s < k; s++)
         {
             cost1 = 0.0;
-            for (i = 0; i < collection.no_attributes; i++)
+            for (i = 0; i < data_set.no_attributes; i++)
             {
                 if (i != 0)
                 {
-                    cost1 += pow((collection.records[r].values[i] - c.clusters[s].values[i]), 2);
+                    cost1 += pow((data_set.records[r].values[i] - c.clusters[s].values[i]), 2);
                 }
             }
             if (sqrt(cost1) < cost3)
             {
                 cost3 = sqrt(cost1);
-                (collection.records[r]).label = s;
+                (data_set.records[r]).label = s;
             }
         }
     }
 
     for (i = 0; i < k; i++)
     {
-        for (j = 0; j < collection.no_attributes; j++)
+        for (j = 0; j < data_set.no_attributes; j++)
         {
             if (j == 0)
                 printf("\nCluster Record ID: %d\nData: ", c.clusters[i].id);
@@ -115,7 +115,7 @@ int PAM(COLLECTION collection, int k)
     return 0;
 }
 
-int initialize_collection(COLLECTION *collection, int no_attributes, int no_records)
+int initialize_collection(DATASET *data_set, int no_attributes, int no_records)
 {
     FILE *file;
     char ch;
@@ -131,11 +131,11 @@ int initialize_collection(COLLECTION *collection, int no_attributes, int no_reco
         printf("\nNumber should be greater than 0\n");
         return -1;
     }
-    collection->no_records = no_records;
-    collection->no_attributes = no_attributes;
-    collection->records = (RECORD *)malloc(no_records * sizeof(RECORD));
+    data_set->no_records = no_records;
+    data_set->no_attributes = no_attributes;
+    data_set->records = (DATA *)malloc(no_records * sizeof(DATA));
 
-    if (collection->records == NULL)
+    if (data_set->records == NULL)
     {
         printf("\nError\n");
         return -1;
@@ -148,14 +148,14 @@ int initialize_collection(COLLECTION *collection, int no_attributes, int no_reco
     }
     for (i = 0; i < no_records; i++)
     {
-        collection->records[i].values = (float *)malloc(sizeof(float) * no_attributes);
+        data_set->records[i].values = (float *)malloc(sizeof(float) * no_attributes);
         for (j = 0; j < no_attributes; j++)
         {
             fscanf(file, "%f\t", &dataPoints);
-            collection->records[i].values[j] = dataPoints;
+            data_set->records[i].values[j] = dataPoints;
             if (j == 0)
             {
-                collection->records[i].id = collection->records[i].values[j];
+                data_set->records[i].id = data_set->records[i].values[j];
             }
         }
     }
@@ -163,20 +163,20 @@ int initialize_collection(COLLECTION *collection, int no_attributes, int no_reco
     return 0;
 }
 
-int display_data(COLLECTION collection)
+int display_data(DATASET data_set)
 {
     int i, j;
-    for (i = 0; i < collection.no_records; i++)
+    for (i = 0; i < data_set.no_records; i++)
     {
-        for (j = 0; j < collection.no_attributes; j++)
+        for (j = 0; j < data_set.no_attributes; j++)
         {
             if (j == 0)
             {
-                printf("\nRecord ID: %d\nLabel: %d\nData: ", collection.records[i].id, collection.records[i].label);
+                printf("\nRecord ID: %d\nLabel: %d\nData: ", data_set.records[i].id, data_set.records[i].label);
             }
             else
             {
-                printf("%.1f,  ", collection.records[i].values[j]);
+                printf("%.1f,  ", data_set.records[i].values[j]);
             }
         }
         printf("\n");
@@ -187,7 +187,7 @@ int display_data(COLLECTION collection)
 int main()
 {
     int res, n, k, a;
-    COLLECTION collection;
+    DATASET data_set;
 
     printf("\nNumber of clusters: ");
     scanf("%d", &k);
@@ -198,20 +198,20 @@ int main()
     printf("\nNumber of attributes of dataset with record ID: ");
     scanf("%d", &a);
 
-    res = initialize_collection(&collection, a, n);
+    res = initialize_collection(&data_set, a, n);
     if (res != 0)
     {
         return -1;
     }
 
-    res = PAM(collection, k);
+    res = PAM(data_set, k);
     if (res != 0)
     {
         printf("\nError!");
         return -1;
     }
-    res = display_data(collection);
-    free(collection.records->values);
-    free(collection.records);
+    res = display_data(data_set);
+    free(data_set.records->values);
+    free(data_set.records);
     return 0;
 }
