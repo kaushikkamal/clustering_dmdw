@@ -22,6 +22,80 @@ typedef struct
     RECORD *clusterData;
 } CLUSTER;
 
+int initialize(COLLECTION *, int, int);
+int readData(COLLECTION);
+int pam(COLLECTION, int);
+int displayData(COLLECTION);
+int releaseMemory(COLLECTION);
+
+int main()
+{
+    int result, numRecords, numCluster, numAttributes;
+    COLLECTION coll;
+
+    do
+    {
+        printf("\nEnter the number of clusters: ");
+        scanf("%d", &numCluster);
+
+        if (numCluster < 1)
+            printf("\nThe number of clusters should be greater than 0\n");
+        else
+            break;
+
+    } while (numCluster < 1);
+
+    do
+    {
+        printf("\nEnter the number of attributes of dataset(including record ID): ");
+        scanf("%d", &numAttributes);
+
+        printf("\nEnter the number of records of dataset: ");
+        scanf("%d", &numRecords);
+
+        result = initialize(&coll, numAttributes, numRecords);
+
+        if (result == -1)
+            printf("\nNumber of records should be greater than 0\n");
+        else if (result == -2)
+            printf("\nNumber of attributes should be greater than 0\n");
+        else if (result == -3)
+            printf("\nMemory is not allocated\n");
+        else
+            break;
+
+    } while (result != 0);
+
+    result = readData(coll);
+    if (result != 0)
+    {
+        printf("\nCannot open file!");
+        return -1;
+    }
+
+    result = pam(coll, numCluster);
+    if (result != 0)
+    {
+        printf("\nError in pam!");
+        return -1;
+    }
+
+    result = displayData(coll);
+    if (result != 0)
+    {
+        printf("\nError in display!");
+        return -1;
+    }
+
+    result = releaseMemory(coll);
+    if (result != 0)
+    {
+        printf("\nTerminated unsuccessfully");
+        return -1;
+    }
+    return 0;
+}
+
 int initialize(COLLECTION *coll, int numAttributes, int numRecords)
 {
     if (numRecords <= 0)
@@ -105,18 +179,19 @@ int pam(COLLECTION coll, int k)
                 for (n = 0; n < k; n++)
                 {
                     tempCostSum = 0.0;
+
                     for (i = 0; i < coll.numAttributes; i++)
-                    {
                         if (i != 0)
                             tempCostSum += pow((coll.array[m].data[i] - cluster.clusterData[n].data[i]), 2);
-                    }
 
                     currentCost = sqrt(tempCostSum);
+
                     if (currentCost < minCost)
                         minCost = currentCost;
                 }
                 totalCost += minCost;
             }
+
             if (totalCost < allMinTotalCost)
             {
                 allMinTotalCost = totalCost;
@@ -134,11 +209,11 @@ int pam(COLLECTION coll, int k)
         for (n = 0; n < k; n++)
         {
             tempCostSum = 0.0;
+
             for (i = 0; i < coll.numAttributes; i++)
-            {
                 if (i != 0)
                     tempCostSum += pow((coll.array[m].data[i] - cluster.clusterData[n].data[i]), 2);
-            }
+
             currentCost = sqrt(tempCostSum);
 
             if (currentCost < minCost)
@@ -154,12 +229,12 @@ int pam(COLLECTION coll, int k)
     {
         printf("Cluster %d :", m);
         for (n = 0; n < coll.numRecords; n++)
-        {
             if (m == coll.array[n].label)
                 printf(" %d,", coll.array[n].recordId);
-        }
+
         printf("\n");
     }
+
     return 0;
 }
 
@@ -172,13 +247,9 @@ int displayData(COLLECTION coll)
         for (j = 0; j < coll.numAttributes; j++)
         {
             if (j == 0)
-            {
                 printf("\nRecord ID: %d\nLabel: %d\nData: ", coll.array[i].recordId, coll.array[i].label);
-            }
             else
-            {
                 printf("%.1f,  ", coll.array[i].data[j]);
-            }
         }
         printf("\n");
     }
@@ -191,73 +262,5 @@ int releaseMemory(COLLECTION coll)
     free(coll.array);
     coll.array->data = NULL;
     coll.array = NULL;
-    return 0;
-}
-
-int main()
-{
-    int result, numRecords, numCluster, numAttributes;
-    COLLECTION coll;
-
-    do
-    {
-        printf("\nEnter the number of clusters: ");
-        scanf("%d", &numCluster);
-
-        if (numCluster < 1)
-            printf("\nThe number of clusters should be greater than 0\n");
-        else
-            break;
-
-    } while (numCluster < 1);
-
-    do
-    {
-        printf("\nEnter the number of attributes of dataset(including record ID): ");
-        scanf("%d", &numAttributes);
-
-        printf("\nEnter the number of records of dataset: ");
-        scanf("%d", &numRecords);
-
-        result = initialize(&coll, numAttributes, numRecords);
-
-        if (result == -1)
-            printf("\nNumber of records should be greater than 0\n");
-        else if (result == -2)
-            printf("\nNumber of attributes should be greater than 0\n");
-        else if (result == -3)
-            printf("\nMemory is not allocated\n");
-        else
-            break;
-
-    } while (result != 0);
-
-    result = readData(coll);
-    if (result != 0)
-    {
-        printf("\nCannot open file!");
-        return -1;
-    }
-
-    result = pam(coll, numCluster);
-    if (result != 0)
-    {
-        printf("\nError in pam!");
-        return -1;
-    }
-
-    result = displayData(coll);
-    if (result != 0)
-    {
-        printf("\nError in display!");
-        return -1;
-    }
-
-    result = releaseMemory(coll);
-    if (result != 0)
-    {
-        printf("\nTerminated unsuccessfully");
-        return -1;
-    }
     return 0;
 }
