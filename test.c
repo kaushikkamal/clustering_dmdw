@@ -192,26 +192,27 @@ int pam(COLLECTION coll, int k)
                 coll.array[m].label = n;
                 minCost = currentCost;
             }
-            printf("\n\n");
+            // printf("\n\n");
         }
+        // printf("\n%f\n\n",minCost);
     }
     result = display_data(coll);
     // display cluster
-    for (i = 0; i < k; i++)
-    {
-        for (j = 0; j < coll.noOfAttributes; j++)
-        {
-            if (j == 0)
-            {
-                printf("\nCluster Record ID: %f\nData: ", cluster.clusterData[i].p[j]);
-            }
-            else
-            {
-                printf("%.1f  ", cluster.clusterData[i].p[j]);
-            }
-        }
-        printf("\n");
-    }
+    // for (i = 0; i < k; i++)
+    // {
+    //     for (j = 0; j < coll.noOfAttributes; j++)
+    //     {
+    //         if (j == 0)
+    //         {
+    //             printf("\nCluster Record ID: %f\nData: ", cluster.clusterData[i].p[j]);
+    //         }
+    //         else
+    //         {
+    //             printf("%.1f  ", cluster.clusterData[i].p[j]);
+    //         }
+    //     }
+    //     printf("\n");
+    // }
     return 0;
 }
 
