@@ -6,7 +6,7 @@
 
 typedef struct
 {
-    int recordId,label;
+    int recordId, label;
     float *data;
 } RECORD;
 
@@ -62,11 +62,11 @@ int readData(COLLECTION coll)
             fscanf(file, "%f\t", &dataPoints);
             coll.array[i].data[j] = dataPoints;
 
-            if (j == 0){
+            if (j == 0)
+            {
                 coll.array[i].recordId = coll.array[i].data[j];
                 coll.array[i].label = -1;
             }
-               
         }
     }
     fclose(file);
@@ -91,7 +91,7 @@ int pam(COLLECTION coll, int k)
 
     for (p = 0; p < k; p++)
     {
-        allMinTotalCost = __FLT_MAX__;
+        allMinTotalCost = __FLT_MAX__;          // max float
         for (q = 0; q < coll.numRecords; q++)
         {
             totalCost = 0.0;
@@ -143,7 +143,7 @@ int pam(COLLECTION coll, int k)
 
             if (currentCost < minCost)
             {
-                (coll.array[m]).label = n+1;
+                (coll.array[m]).label = n + 1;
                 minCost = currentCost;
             }
         }
@@ -231,12 +231,6 @@ int main()
             break;
 
     } while (result != 0);
-
-    // if (result != 0)
-    // {
-    //     printf("\nError in initialization!");
-    //     return -1;
-    // }
 
     result = readData(coll);
     if (result != 0)

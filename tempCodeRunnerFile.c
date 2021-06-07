@@ -1,1 +1,1 @@
- re
+releaseMemory
